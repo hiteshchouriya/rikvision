@@ -33,7 +33,7 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   return (
-    <main className="relative bg-background text-foreground overflow-x-hidden">
+    <main className="relative bg-background text-foreground" style={{ overflowX: "clip" }}>
       <Nav />
       <Hero />
       <Problem />
