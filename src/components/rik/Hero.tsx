@@ -1,76 +1,120 @@
 import { useEffect, useRef } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
 
 export function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
+  const pinRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const headlineRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const video = videoRef.current;
     const section = sectionRef.current;
-    if (!video || !section) return;
+    const pin = pinRef.current;
+    if (!video || !section || !pin) return;
 
-    let trigger: ScrollTrigger | undefined;
+    let cancelled = false;
+    let cleanup = () => {};
 
-    const setupScrub = () => {
-      const duration = video.duration;
-      if (!duration || !isFinite(duration)) return;
+    const initScrollVideo = async () => {
+      const [{ gsap }, { ScrollTrigger }] = await Promise.all([
+        import("gsap"),
+        import("gsap/ScrollTrigger"),
+      ]);
+      if (cancelled) return;
 
-      trigger = ScrollTrigger.create({
-        trigger: section,
-        start: "top top",
-        end: "bottom top",
-        scrub: 0.5,
-        onUpdate: (self) => {
-          const t = self.progress * duration;
-          if (!isNaN(t)) video.currentTime = t;
-        },
-      });
+      gsap.registerPlugin(ScrollTrigger);
+      let isReady = false;
+      let trigger: ReturnType<typeof ScrollTrigger.create> | undefined;
+      let headlineTween: ReturnType<typeof gsap.fromTo> | undefined;
 
-      gsap.fromTo(
-        headlineRef.current,
-        { y: 80, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 1.2,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: section,
-            start: "top top",
-            end: "60% top",
-            scrub: 1,
-          },
+      const setVideoTime = (time: number) => {
+        try {
+          video.currentTime = time;
+        } catch {
+          // Some browsers reject seeks until the first frame is decoded.
         }
-      );
+      };
+
+      const setupScrub = () => {
+        const duration = video.duration;
+        if (isReady || !duration || !isFinite(duration)) return;
+        isReady = true;
+
+        video.pause();
+        setVideoTime(0.001);
+
+        trigger = ScrollTrigger.create({
+          trigger: section,
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 0.5,
+          pin,
+          pinSpacing: false,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+          onUpdate: (self) => {
+            const t = self.progress * duration;
+            if (!isNaN(t)) setVideoTime(Math.min(duration, Math.max(0, t)));
+          },
+        });
+
+        if (headlineRef.current) {
+          headlineTween = gsap.fromTo(
+            headlineRef.current,
+            { y: 80, opacity: 0 },
+            {
+              y: 0,
+              opacity: 1,
+              duration: 1.2,
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: section,
+                start: "top top",
+                end: "60% top",
+                scrub: 1,
+              },
+            }
+          );
+        }
+
+        requestAnimationFrame(() => ScrollTrigger.refresh());
+      };
+
+      const refresh = () => requestAnimationFrame(() => ScrollTrigger.refresh());
+      const onMetadata = () => setupScrub();
+
+      if (video.readyState >= 1) {
+        setupScrub();
+      } else {
+        video.load();
+        video.addEventListener("loadedmetadata", onMetadata, { once: true });
+      }
+
+      video.addEventListener("loadeddata", refresh);
+      window.addEventListener("load", refresh);
+      window.addEventListener("resize", refresh);
+
+      cleanup = () => {
+        video.removeEventListener("loadedmetadata", onMetadata);
+        video.removeEventListener("loadeddata", refresh);
+        window.removeEventListener("load", refresh);
+        window.removeEventListener("resize", refresh);
+        headlineTween?.kill();
+        trigger?.kill();
+      };
     };
 
-    if (video.readyState >= 1) {
-      setupScrub();
-      ScrollTrigger.refresh();
-    } else {
-      video.addEventListener(
-        "loadedmetadata",
-        () => {
-          setupScrub();
-          ScrollTrigger.refresh();
-        },
-        { once: true }
-      );
-    }
+    initScrollVideo();
 
     return () => {
-      trigger?.kill();
+      cancelled = true;
+      cleanup();
     };
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative h-[200vh]">
-      <div className="sticky top-0 h-screen w-full overflow-hidden">
+    <section ref={sectionRef} className="relative h-[240vh]">
+      <div ref={pinRef} className="h-screen w-full overflow-hidden">
         <video
           ref={videoRef}
           src="/videos/rik_hero.mp4"
@@ -79,16 +123,7 @@ export function Hero() {
           preload="auto"
           className="absolute inset-0 h-full w-full object-cover"
         />
-        {/* watermark mask — fades the bottom-right corner where AI tool logos appear */}
-        <div
-          className="absolute bottom-0 right-0 z-[5] pointer-events-none"
-          style={{
-            width: "260px",
-            height: "120px",
-            background:
-              "radial-gradient(ellipse at bottom right, hsl(var(--background, 220 20% 2%)) 30%, transparent 75%)",
-          }}
-        />
+        <div className="watermark-mask watermark-mask--hero" />
         {/* gradient + grid overlays */}
         <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/30 to-background" />
         <div className="absolute inset-0 perspective-grid opacity-30" />

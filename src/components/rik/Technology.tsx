@@ -1,8 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const layers = [
   { at: 0.15, side: "left", title: "Road Camera", role: "Forward vision · 60fps · low-light HDR" },
@@ -17,63 +13,108 @@ const specs = ["C-V2X PC5", "Edge NPU 8 TOPS", "NavIC + GPS", "NIR Vision", "Sup
 
 export function Technology() {
   const sectionRef = useRef<HTMLElement>(null);
+  const pinRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [activeLayer, setActiveLayer] = useState<number>(-1);
 
   useEffect(() => {
     const v = videoRef.current;
     const s = sectionRef.current;
-    if (!v || !s) return;
+    const pin = pinRef.current;
+    if (!v || !s || !pin) return;
 
-    let trigger: ScrollTrigger | undefined;
+    let cancelled = false;
+    let cleanup = () => {};
 
-    const setup = () => {
-      const duration = v.duration;
-      if (!duration || !isFinite(duration)) return;
+    const initScrollVideo = async () => {
+      const [{ gsap }, { ScrollTrigger }] = await Promise.all([
+        import("gsap"),
+        import("gsap/ScrollTrigger"),
+      ]);
+      if (cancelled) return;
 
-      trigger = ScrollTrigger.create({
-        trigger: s,
-        start: "top top",
-        end: "bottom bottom",
-        scrub: 0.6,
-        onUpdate: (self) => {
-          const p = self.progress;
-          const t = p * duration;
-          if (!isNaN(t)) v.currentTime = t;
+      gsap.registerPlugin(ScrollTrigger);
+      let isReady = false;
+      let trigger: ReturnType<typeof ScrollTrigger.create> | undefined;
 
-          // determine active layer
-          let active = -1;
-          for (let i = 0; i < layers.length; i++) {
-            if (p >= layers[i].at - 0.06 && p <= layers[i].at + 0.08) {
-              active = i;
-              break;
+      const setVideoTime = (time: number) => {
+        try {
+          v.currentTime = time;
+        } catch {
+          // Some browsers reject seeks until the first frame is decoded.
+        }
+      };
+
+      const setup = () => {
+        const duration = v.duration;
+        if (isReady || !duration || !isFinite(duration)) return;
+        isReady = true;
+
+        v.pause();
+        setVideoTime(0.001);
+
+        trigger = ScrollTrigger.create({
+          trigger: s,
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 0.6,
+          pin,
+          pinSpacing: false,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+          onUpdate: (self) => {
+            const p = self.progress;
+            const t = p * duration;
+            if (!isNaN(t)) setVideoTime(Math.min(duration, Math.max(0, t)));
+
+            let active = -1;
+            for (let i = 0; i < layers.length; i++) {
+              if (p >= layers[i].at - 0.06 && p <= layers[i].at + 0.08) {
+                active = i;
+                break;
+              }
             }
-          }
-          setActiveLayer(active);
-        },
-      });
+            setActiveLayer(active);
+          },
+        });
+
+        requestAnimationFrame(() => ScrollTrigger.refresh());
+      };
+
+      const refresh = () => requestAnimationFrame(() => ScrollTrigger.refresh());
+      const onMetadata = () => setup();
+
+      if (v.readyState >= 1) {
+        setup();
+      } else {
+        v.load();
+        v.addEventListener("loadedmetadata", onMetadata, { once: true });
+      }
+
+      v.addEventListener("loadeddata", refresh);
+      window.addEventListener("load", refresh);
+      window.addEventListener("resize", refresh);
+
+      cleanup = () => {
+        v.removeEventListener("loadedmetadata", onMetadata);
+        v.removeEventListener("loadeddata", refresh);
+        window.removeEventListener("load", refresh);
+        window.removeEventListener("resize", refresh);
+        trigger?.kill();
+      };
     };
 
-    if (v.readyState >= 1) {
-      setup();
-      ScrollTrigger.refresh();
-    } else {
-      v.addEventListener(
-        "loadedmetadata",
-        () => {
-          setup();
-          ScrollTrigger.refresh();
-        },
-        { once: true }
-      );
-    }
+    initScrollVideo();
 
-    return () => { trigger?.kill(); };
+    return () => {
+      cancelled = true;
+      cleanup();
+    };
   }, []);
 
   return (
     <section id="technology" ref={sectionRef} className="relative h-[400vh]">
-      <div className="sticky top-0 h-screen w-full overflow-hidden flex flex-col">
+      <div ref={pinRef} className="h-screen w-full overflow-hidden flex flex-col">
         <div className="perspective-grid absolute inset-0 opacity-30" />
 
         <div className="relative z-10 px-6 pt-20 mx-auto max-w-6xl w-full">
@@ -94,16 +135,7 @@ export function Technology() {
               preload="metadata"
               className="w-full h-auto block"
             />
-            {/* watermark mask — fades the bottom-right corner where AI tool logos appear */}
-            <div
-              className="absolute bottom-0 right-0 pointer-events-none"
-              style={{
-                width: "30%",
-                height: "22%",
-                background:
-                  "radial-gradient(ellipse at bottom right, hsl(var(--background, 220 20% 2%)) 35%, transparent 80%)",
-              }}
-            />
+            <div className="watermark-mask watermark-mask--technology" />
           </div>
 
           {/* floating labels */}
