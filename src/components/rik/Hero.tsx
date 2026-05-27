@@ -49,8 +49,19 @@ export function Hero() {
       );
     };
 
-    if (video.readyState >= 1) setupScrub();
-    else video.addEventListener("loadedmetadata", setupScrub, { once: true });
+    if (video.readyState >= 1) {
+      setupScrub();
+      ScrollTrigger.refresh();
+    } else {
+      video.addEventListener(
+        "loadedmetadata",
+        () => {
+          setupScrub();
+          ScrollTrigger.refresh();
+        },
+        { once: true }
+      );
+    }
 
     return () => {
       trigger?.kill();
@@ -67,6 +78,16 @@ export function Hero() {
           playsInline
           preload="auto"
           className="absolute inset-0 h-full w-full object-cover"
+        />
+        {/* watermark mask — fades the bottom-right corner where AI tool logos appear */}
+        <div
+          className="absolute bottom-0 right-0 z-[5] pointer-events-none"
+          style={{
+            width: "260px",
+            height: "120px",
+            background:
+              "radial-gradient(ellipse at bottom right, hsl(var(--background, 220 20% 2%)) 30%, transparent 75%)",
+          }}
         />
         {/* gradient + grid overlays */}
         <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/30 to-background" />
