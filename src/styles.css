@@ -131,6 +131,28 @@
     text-transform: uppercase;
     color: var(--color-primary);
   }
+
+  .watermark-mask {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    z-index: 5;
+    pointer-events: none;
+    background:
+      linear-gradient(135deg, transparent 0%, color-mix(in oklab, var(--background) 70%, transparent) 42%, var(--background) 100%),
+      radial-gradient(ellipse at bottom right, var(--background) 0%, var(--background) 42%, transparent 74%);
+    filter: blur(0.4px);
+  }
+
+  .watermark-mask--hero {
+    width: min(42vw, 520px);
+    height: min(26vh, 250px);
+  }
+
+  .watermark-mask--technology {
+    width: 46%;
+    height: 34%;
+  }
 }
 
 @keyframes scrollDown {
