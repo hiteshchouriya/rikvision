@@ -85,14 +85,26 @@ export function Technology() {
         </div>
 
         <div className="relative flex-1 flex items-center justify-center">
-          <video
-            ref={videoRef}
-            src="/videos/rik_explode.mp4"
-            muted
-            playsInline
-            preload="metadata"
-            className="w-[85vw] max-w-5xl h-auto"
-          />
+          <div className="relative w-[85vw] max-w-5xl">
+            <video
+              ref={videoRef}
+              src="/videos/rik_explode.mp4"
+              muted
+              playsInline
+              preload="metadata"
+              className="w-full h-auto block"
+            />
+            {/* watermark mask — fades the bottom-right corner where AI tool logos appear */}
+            <div
+              className="absolute bottom-0 right-0 pointer-events-none"
+              style={{
+                width: "30%",
+                height: "22%",
+                background:
+                  "radial-gradient(ellipse at bottom right, hsl(var(--background, 220 20% 2%)) 35%, transparent 80%)",
+              }}
+            />
+          </div>
 
           {/* floating labels */}
           {layers.map((l, i) => (
