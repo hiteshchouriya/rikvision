@@ -2,7 +2,7 @@ import { useState } from "react";
 import { z } from "zod";
 
 // TODO: Replace with the Google Apps Script webhook URL provided by the client.
-const WEBHOOK_URL = "";
+const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbzDXj-nhfxXZY75Cyi3DQOV-AQccAWzCoeB95I4WK3WO3i-g_JzhKD_nNsIUvGa66vh/exec";
 
 const schema = z.object({
   fullName: z.string().trim().min(1, "Required").max(120),
