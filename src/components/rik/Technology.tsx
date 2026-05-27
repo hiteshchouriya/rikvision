@@ -54,8 +54,19 @@ export function Technology() {
       });
     };
 
-    if (v.readyState >= 1) setup();
-    else v.addEventListener("loadedmetadata", setup, { once: true });
+    if (v.readyState >= 1) {
+      setup();
+      ScrollTrigger.refresh();
+    } else {
+      v.addEventListener(
+        "loadedmetadata",
+        () => {
+          setup();
+          ScrollTrigger.refresh();
+        },
+        { once: true }
+      );
+    }
 
     return () => { trigger?.kill(); };
   }, []);
