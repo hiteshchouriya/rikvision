@@ -25,7 +25,7 @@ export function Hero() {
       gsap.registerPlugin(ScrollTrigger);
       let isReady = false;
       let trigger: ReturnType<typeof ScrollTrigger.create> | undefined;
-      let headlineTween: gsap.core.Tween | undefined;
+      let headlineTween: ReturnType<typeof gsap.fromTo> | undefined;
 
       const setVideoTime = (time: number) => {
         try {
