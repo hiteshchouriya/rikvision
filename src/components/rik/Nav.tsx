@@ -19,6 +19,10 @@ export function Nav() {
           <span className="h-2.5 w-2.5 rounded-full bg-primary cyan-glow" />
           <span className="font-display text-lg font-bold tracking-widest">RIK</span>
         </div>
+        <nav className="hidden sm:flex items-center gap-6">
+          <a href="#technology" className="text-xs uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-colors">Technology</a>
+          <a href="#platform" className="text-xs uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-colors">Platform</a>
+        </nav>
         <a
           href="#early-access"
           className="text-xs uppercase tracking-[0.2em] text-primary hover:text-glow transition-all"

@@ -4,6 +4,7 @@ import { Hero } from "@/components/rik/Hero";
 import { Problem } from "@/components/rik/Problem";
 import { Technology } from "@/components/rik/Technology";
 import { Shields } from "@/components/rik/Shields";
+import { Platform } from "@/components/rik/Platform";
 import { InterestForm } from "@/components/rik/InterestForm";
 
 export const Route = createFileRoute("/")({
@@ -39,6 +40,7 @@ function Index() {
       <Problem />
       <Technology />
       <Shields />
+      <Platform />
       <InterestForm />
       <footer className="border-t border-white/8 py-10 text-center">
         <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
