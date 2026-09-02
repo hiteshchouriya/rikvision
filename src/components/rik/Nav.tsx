@@ -22,6 +22,7 @@ export function Nav() {
         <nav className="hidden sm:flex items-center gap-6">
           <a href="#technology" className="text-xs uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-colors">Technology</a>
           <a href="#platform" className="text-xs uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-colors">Platform</a>
+          <a href="#compare" className="text-xs uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-colors">Why RIK</a>
         </nav>
         <a
           href="#early-access"
