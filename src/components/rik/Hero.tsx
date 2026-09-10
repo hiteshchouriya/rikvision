@@ -130,9 +130,12 @@ export function Hero() {
         <div className="scan-line" />
 
         {/* top badges */}
-        <div className="absolute top-6 left-6 flex items-center gap-2.5 z-10">
+        <div className="absolute top-6 left-6 flex items-baseline gap-2.5 z-10">
           <span className="h-2.5 w-2.5 rounded-full bg-primary cyan-glow" />
           <span className="font-display text-xl font-bold tracking-widest">RIK</span>
+          <span className="hidden sm:inline text-[9px] uppercase tracking-[0.3em] text-muted-foreground/70">
+            by V2X Vision
+          </span>
         </div>
         <div className="absolute top-6 left-1/2 -translate-x-1/2 z-10">
           <span className="glass px-4 py-1.5 text-[10px] uppercase tracking-[0.25em] text-primary">
