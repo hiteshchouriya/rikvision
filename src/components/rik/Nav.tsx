@@ -15,9 +15,14 @@ export function Nav() {
       }`}
     >
       <div className="glass mx-4 mt-4 flex items-center justify-between px-5 py-3">
-        <div className="flex items-center gap-2.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-primary cyan-glow" />
-          <span className="font-display text-lg font-bold tracking-widest">RIK</span>
+        <div className="flex items-baseline gap-2.5">
+          <div className="flex items-center gap-2.5">
+            <span className="h-2.5 w-2.5 rounded-full bg-primary cyan-glow" />
+            <span className="font-display text-lg font-bold tracking-widest">RIK</span>
+          </div>
+          <span className="hidden sm:inline text-[9px] uppercase tracking-[0.3em] text-muted-foreground/70">
+            by V2X Vision
+          </span>
         </div>
         <nav className="hidden sm:flex items-center gap-6">
           <a href="#technology" className="text-xs uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-colors">Technology</a>

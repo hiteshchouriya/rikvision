@@ -20,6 +20,7 @@ export const Route = createFileRoute("/")({
       },
       { property: "og:title", content: "RIK — The Road Has Never Had a Guardian" },
       { property: "og:description", content: "Offline V2V protection. Built for Indian roads." },
+      { property: "og:site_name", content: "V2X Vision" },
       { property: "og:type", content: "website" },
     ],
     links: [
@@ -46,7 +47,10 @@ function Index() {
       <InterestForm />
       <footer className="border-t border-white/8 py-10 text-center">
         <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-          RIK · Making Every Road Safer · Early R&D Phase · India
+          V2X Vision · RIK · Making Every Road Safer · Early R&D Phase · India
+        </p>
+        <p className="mt-3 text-[10px] uppercase tracking-[0.25em] text-muted-foreground/60">
+          © {new Date().getFullYear()} V2X Vision
         </p>
       </footer>
     </main>
